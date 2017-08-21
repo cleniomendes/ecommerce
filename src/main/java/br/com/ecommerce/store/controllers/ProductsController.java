@@ -1,29 +1,52 @@
 package br.com.ecommerce.store.controllers;
 
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import br.com.ecommerce.store.daos.ProductDAO;
+import br.com.ecommerce.store.models.BookType;
 import br.com.ecommerce.store.models.Product;
+import br.com.ecommerce.store.validation.ProductValidator;
 
 @Controller
 @Transactional
+@RequestMapping("/products")
 public class ProductsController {
-	@Autowired
-	private ProductDAO productDAO;
-	
-	@RequestMapping("/products")
-	public String save(Product product) {
-		System.out.println("Registering the product " + product);
-		productDAO.save(product);
-		return "hello-world";
+	@InitBinder
+	protected void initBinder(WebDataBinder binder) {
+		binder.setValidator(new ProductValidator());
 	}
 
-	@RequestMapping("/products/form")
-	public String form() {
-		return "products/form";
+	@Autowired
+	private ProductDAO productDAO;
+
+	@RequestMapping(method = RequestMethod.POST)
+	public String save(@Valid Product product, RedirectAttributes redirectAttributes) {
+		productDAO.save(product);
+		redirectAttributes.addFlashAttribute("sucesso", "Produto cadastrado com sucesso");
+		return "redirect:products";
+	}
+
+	@RequestMapping("/form")
+	public ModelAndView form() {
+		ModelAndView modelAndView = new ModelAndView("products/form");
+		modelAndView.addObject("types", BookType.values());
+		return modelAndView;
+	}
+
+	@RequestMapping(method = RequestMethod.GET)
+	public ModelAndView list() {
+		ModelAndView modelAndView = new ModelAndView("products/list");
+		modelAndView.addObject("products", productDAO.list());
+		return modelAndView;
 	}
 }
