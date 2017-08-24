@@ -5,6 +5,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,11 +30,15 @@ public class ProductsController {
 	@Autowired
 	private ProductDAO productDAO;
 
-	@RequestMapping(method = RequestMethod.POST)
-	public String save(@Valid Product product, RedirectAttributes redirectAttributes) {
+	@RequestMapping(method = RequestMethod.POST, name="saveProduct")
+	public ModelAndView save(@Valid Product product, BindingResult bindingResult,
+			RedirectAttributes redirectAttributes) {
+		if (bindingResult.hasErrors()) {
+			return form();
+		}
 		productDAO.save(product);
 		redirectAttributes.addFlashAttribute("sucesso", "Produto cadastrado com sucesso");
-		return "redirect:products";
+		return new ModelAndView("redirect:produtos");
 	}
 
 	@RequestMapping("/form")

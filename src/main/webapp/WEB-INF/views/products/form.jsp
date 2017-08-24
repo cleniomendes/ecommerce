@@ -1,4 +1,5 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,7 +7,15 @@
 <title>Product registration</title>
 </head>
 <body>
-	<form method="post" action="/spring-ecommerce/products">
+	<spring:hasBindErrors name="product">
+		<ul>
+			<c:forEach var="error" items="${errors.allErrors}">
+				<li>${error.code}</li>
+			</c:forEach>
+		</ul>
+	</spring:hasBindErrors>
+
+	<form action="${spring.mvcUrl('saveProduct').build()}" method="post">
 		<div>
 			<label for="title">Titulo</label> <input type="text" name="title"
 				id="title" />
